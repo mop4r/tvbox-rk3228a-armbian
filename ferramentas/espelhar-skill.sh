@@ -1,6 +1,7 @@
 #!/bin/bash
 # Copia a skill tvbox-rk3228a (fonte única da documentação) para este repositório.
-# Rodar depois de qualquer mudança na skill; em seguida: git add -A && git commit && git push.
+# Rodar depois de qualquer mudança na skill; em seguida: python -I ferramentas/publicar.py "mensagem"
+# (gera a versão limpa em publico/ e sobe). Nunca copiar de publico/ ou do GitHub para cá.
 set -euo pipefail
 S="${SKILL:-$HOME/workspace/scripts/skills/tvbox-rk3228a}"
 R="$(cd "$(dirname "$0")/.." && pwd)"

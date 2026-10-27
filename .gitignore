@@ -22,3 +22,4 @@ __pycache__/
 
 # clone do GitHub com a versão limpa (gerado por ferramentas/publicar.py)
 publico/
+LEIA-ANTES.local.md
