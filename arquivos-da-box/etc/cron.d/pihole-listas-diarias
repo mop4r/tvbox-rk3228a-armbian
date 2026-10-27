@@ -1,0 +1,3 @@
+# Atualiza as listas de bloqueio (StevenBlack + HaGeZi) todo dia as 04:40.
+# Arquivo separado do /etc/cron.d/pihole porque aquele e reescrito pelo "pihole -up".
+40 4 * * *   root   PATH="$PATH:/usr/sbin:/usr/local/bin/" pihole updateGravity > /var/log/pihole/listas-diarias.log 2>&1 || logger -t pihole-listas "falha ao atualizar listas, veja /var/log/pihole/listas-diarias.log"

@@ -1,0 +1,5 @@
+[Unit]
+Description=Confirma o DDR turbo apos 10 min estavel
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/ddr-turbo confirmar

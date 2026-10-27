@@ -1,0 +1,17 @@
+# DNS do Pi-hole (porta 53) so para: a propria box, a rede de casa e o Tailscale.
+# Tabela propria: recarregar nao mexe nas regras do Tailscale.
+table inet dnsguard
+delete table inet dnsguard
+table inet dnsguard {
+	chain input {
+		type filter hook input priority -10; policy accept;
+		meta l4proto { udp, tcp } th dport 53 jump dns
+	}
+	chain dns {
+		iifname "lo" accept
+		iifname "tailscale0" accept
+		ip saddr { 192.168.0.0/16, 10.0.0.0/8, 172.16.0.0/12 } accept
+		ip6 saddr { fe80::/10, fc00::/7 } accept
+		counter drop
+	}
+}

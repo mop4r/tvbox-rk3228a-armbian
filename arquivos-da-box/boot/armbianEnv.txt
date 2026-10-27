@@ -1,0 +1,10 @@
+verbosity=1
+extraargs=coherent_pool=2M video=HDMI-A-1:1920x1080@60
+bootlogo=false
+overlay_prefix=rk322x
+fdtfile=rk322x-box.dtb
+rootdev=UUID=2d854077-80b2-4bfe-ab30-4907fec2512a
+rootfstype=ext4
+overlays=emmc led-conf7 ddr3-660
+user_overlays=ramoops
+usbstoragequirks=0x2537:0x1066:u,0x2537:0x1068:u

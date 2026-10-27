@@ -1,0 +1,10 @@
+#!/bin/bash
+# Resumo por hora do dia (mediana e pior caso da media de cada minuto). Uso: netmon-resumo [AAAA-MM-DD]
+F=/var/lib/netmon/${1:-$(date +%F)}.csv; [ -f $F ] || { echo "sem dados em $F"; exit 1; }
+awk -F';' 'NR>1{h=substr($1,1,2); n[h]++; for(c=0;c<5;c++){v=$(2+c*3); if(v!="-"){s[h,c]=s[h,c]" "v}}
+  dp[h]=dp[h]" "($17=="timeout"?3000:$17); dc[h]=dc[h]" "($18=="timeout"?3000:$18); if($18=="timeout") tc[h]++}
+ function med(str, a,k,i,j,t){k=split(str,a," "); for(i=1;i<=k;i++)for(j=i+1;j<=k;j++)if(a[j]+0<a[i]+0){t=a[i];a[i]=a[j];a[j]=t}; return k?a[int((k+1)/2)]:"-"}
+ function mx(str, a,k,i,m){k=split(str,a," ");m=0;for(i=1;i<=k;i++)if(a[i]+0>m)m=a[i]+0;return k?m:"-"}
+ END{printf "%-4s %4s | %-11s %-11s %-11s %-11s %-11s | %-9s %-9s %s\n","hora","min","roteador","claro","cloudflare","google","facebook","dnsPihole","dnsClaro","timeoutsClaro";
+ for(hh=0;hh<24;hh++){h=sprintf("%02d",hh); if(!(h in n)) continue; printf "%-4s %4d |", h, n[h]; for(c=0;c<5;c++) printf " %4.0f/%-5.0f", med(s[h,c]), mx(s[h,c]); printf " | %-9s %-9s %d\n", med(dp[h]), med(dc[h]), tc[h]}}' $F
+echo "(ms: mediana/pior da media de 5 pings por minuto; DNS = nome novo a cada minuto, sem cache)"

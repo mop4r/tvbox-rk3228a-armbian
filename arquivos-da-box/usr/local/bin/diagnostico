@@ -1,0 +1,8 @@
+#!/bin/bash
+# Junta o que a box registrou sobre o ultimo travamento/reinicio.
+echo "=== boots recentes"; journalctl --list-boots --no-pager | tail -5
+echo; echo "=== dumps de panico (pstore) ainda nao lidos"; ls -la /var/lib/systemd/pstore/ 2>/dev/null
+for f in /var/lib/systemd/pstore/dmesg-*; do [ -f "$f" ] && grep -aE 'panic|Oops|Internal error|hung|blocked for|pc :|Call trace|lr :' "$f" | head -30; done
+echo; echo "=== caixa-preta: ultimos 10 registros ANTES do boot atual"
+B=$(date -d "$(uptime -s)" +%s); for f in $(ls -t /var/lib/blackbox/*.log | head -2); do cat $f; done | sort | awk -v b="$(date -d @$B +%T)" '$1<b' | tail -10
+echo; echo "=== kernel no boot anterior (ultimas 25 linhas)"; journalctl -k -b -1 --no-pager 2>/dev/null | tail -25

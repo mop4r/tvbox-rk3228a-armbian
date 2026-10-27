@@ -1,0 +1,2 @@
+# Atualiza o Pi-hole todo dia 05:10 (era so domingo; se a rede caisse, perdia a semana). pihole -up nao faz nada se ja esta em dia.
+10 5 * * *   root   /usr/local/sbin/pihole-atualiza.sh

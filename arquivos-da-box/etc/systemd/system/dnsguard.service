@@ -1,0 +1,11 @@
+[Unit]
+Description=Firewall da porta 53 (Pi-hole so para LAN, Tailscale e localhost)
+Before=pihole-FTL.service
+After=network-pre.target
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/nft -f /etc/nftables.d/dnsguard.nft
+ExecStop=/usr/sbin/nft delete table inet dnsguard
+[Install]
+WantedBy=multi-user.target

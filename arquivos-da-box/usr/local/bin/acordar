@@ -1,0 +1,40 @@
+#!/bin/bash
+# Liga um PC da casa pela rede (Wake-on-LAN), usando o painel-rede (que conhece cada aparelho pelo MAC, não pelo IP).
+#   acordar                    -> lista os aparelhos que podem ser ligados
+#   acordar <nome ou MAC>      -> manda o pacote mágico e espera o PC aparecer na rede
+# De fora de casa, pelo Tailscale:  ssh mopar@100.x.y.z acordar meu-pc
+# Página com tudo isso: http://192.168.0.4:8090 (ou http://100.x.y.z:8090)
+set -euo pipefail
+API=http://127.0.0.1:8090
+retrato=$(curl -fsS --max-time 10 -H 'Host: localhost' "$API/api/retrato") || { echo "o painel-rede não respondeu (systemctl status painel-rede)" >&2; exit 2; }
+
+if [ $# -eq 0 ]; then
+  echo "$retrato" | python3 -c '
+import json, sys
+for a in json.load(sys.stdin)["aparelhos"]:
+    if not a["pode_acordar"]: continue
+    nome = a["nome"] or a["nome_auto"] or a["mac"]
+    estado = "ligado (" + a["ip"] + ")" if a["online"] else "desligado"
+    print("  %-22s %s  %s" % (nome, a["mac"], estado))'
+  exit 0
+fi
+
+mac=$(echo "$retrato" | python3 -c '
+import json, sys
+alvo = sys.argv[1].lower().replace("-", ":")
+for a in json.load(sys.stdin)["aparelhos"]:
+    if alvo in (a["mac"], (a["nome"] or "").lower(), (a["nome_auto"] or "").lower()):
+        print(a["mac"]); break' "$1")
+[ -n "$mac" ] || { echo "não achei '$1'. Rode 'acordar' para ver a lista." >&2; exit 1; }
+
+on() { curl -fsS --max-time 5 -H 'Host: localhost' "$API/api/online/$mac" >/dev/null 2>&1; }
+if on; then echo "$1 já está ligado."; exit 0; fi
+curl -fsS --max-time 10 -H 'Host: localhost' -H 'X-Painel: 1' -H 'Content-Type: application/json' \
+  -d "{\"mac\":\"$mac\"}" "$API/api/acordar" >/dev/null
+echo "Pacote enviado para $1 ($mac). Esperando aparecer na rede..."
+for i in $(seq 1 24); do
+  sleep 5
+  if on; then echo "$1 ligou (~$((i * 5)) s)."; exit 0; fi
+done
+echo "$1 não apareceu em 2 minutos. Pode estar ligando ainda, ou o Wake-on-LAN está desligado na BIOS." >&2
+exit 3

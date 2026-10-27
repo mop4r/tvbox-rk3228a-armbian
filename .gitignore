@@ -1,0 +1,24 @@
+# Binários e material de terceiros: vão nas Releases do GitHub, nunca no git
+original/
+imagens/
+dist/
+analise/RKDevTool_2.86/
+analise/RKDevTool_2.96/
+analise/DriverAssitant_5.14/
+analise/rkDumper/
+analise/multitool/*.img
+*.img
+*.img.xz
+*.xz
+*.rar
+*.exe
+
+# Pessoal / local
+CLAUDE.local.md
+.env
+*.env
+__pycache__/
+*.pyc
+
+# clone do GitHub com a versão limpa (gerado por ferramentas/publicar.py)
+publico/

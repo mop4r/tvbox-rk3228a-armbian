@@ -1,0 +1,36 @@
+#!/bin/bash
+# DDR turbo com volta automatica para 330 MHz.
+# O loader sempre liga a DDR em 330; so este script carrega o driver (rk3228_dmc) que sobe a frequencia.
+# em-uso:     criado ao subir a DDR, apagado no desligamento limpo.
+# confirmado: criado apos 10 min estavel em turbo (timer ddr-turbo-confirma).
+# No boot, se em-uso existe (desligamento sem aviso):
+#   - sem confirmado -> caiu nos primeiros 10 min: turbo suspeito -> DESARMA, fica em 330
+#   - com confirmado -> estava estavel ha mais de 10 min: queda de energia/tomada -> MANTEM o turbo
+D=/var/lib/ddr-turbo; L=$D/historico.log; DEV=/sys/class/devfreq/11200000.dmc
+log(){ echo "$(date '+%F %T') $*" >> $L; sync $L; logger -t ddr-turbo "$*"; }
+cur(){ [ -e $DEV/cur_freq ] && echo $(( $(cat $DEV/cur_freq)/1000000 )) || echo 330; }
+case "$1" in
+  boot)
+    if [ -f $D/em-uso ]; then
+      if [ -f $D/confirmado ]; then
+        log "boot anterior terminou sem desligamento limpo, mas o turbo estava estavel ha mais de 10 min: queda de energia/tomada. MANTENDO o turbo."
+      else
+        rm -f $D/habilitado; log "FALLBACK: boot anterior caiu nos primeiros 10 min com turbo ($(cat $D/alvo 2>/dev/null) MHz). Turbo DESARMADO, DDR fica em 330 MHz."
+      fi
+      rm -f $D/em-uso $D/confirmado; sync
+    fi
+    [ -f $D/habilitado ] || { log "turbo desarmado, DDR em 330 MHz"; exit 0; }
+    ALVO=$(cat $D/alvo 2>/dev/null || echo 660)
+    rm -f $D/confirmado; touch $D/em-uso; sync
+    log "subindo DDR para $ALVO MHz (marcador em-uso gravado)"
+    modprobe rk3228_dmc && sleep 2 && echo userspace > $DEV/governor && echo $((ALVO*1000000)) > $DEV/userspace/set_freq
+    sleep 1; log "DDR agora: $(cur) MHz"
+    ;;
+  confirmar) [ -f $D/em-uso ] && [ ! -f $D/confirmado ] && { touch $D/confirmado; sync; log "turbo estavel ha 10 min ($(cur) MHz): confirmado"; } ; true ;;
+  stop)  [ -f $D/em-uso ] && { rm -f $D/em-uso $D/confirmado; sync; log "desligamento limpo, marcadores removidos"; } ; true ;;
+  armar) echo "${2:-660}" > $D/alvo; touch $D/habilitado; sync; log "turbo ARMADO para ${2:-660} MHz (vale no proximo boot)";;
+  desarmar) rm -f $D/habilitado; sync; log "turbo desarmado manualmente (vale no proximo boot)";;
+  simular-queda-cedo) rm -f $D/confirmado; touch $D/em-uso; sync; log "TESTE: queda simulada ANTES de confirmar";;
+  status) echo "habilitado=$([ -f $D/habilitado ] && echo sim || echo nao) alvo=$(cat $D/alvo 2>/dev/null) em-uso=$([ -f $D/em-uso ] && echo sim || echo nao) confirmado=$([ -f $D/confirmado ] && echo sim || echo nao) DDR=$(cur)MHz"; tail -4 $L;;
+  *) echo "uso: ddr-turbo {status|armar [MHz]|desarmar}"; exit 1;;
+esac

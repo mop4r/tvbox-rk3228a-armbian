@@ -1,0 +1,6 @@
+[Unit]
+Description=Monitor de rede (1 medicao por minuto)
+[Service]
+Type=oneshot
+Nice=10
+ExecStart=/usr/local/sbin/netmon.sh

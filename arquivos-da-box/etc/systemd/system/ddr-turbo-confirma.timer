@@ -1,0 +1,6 @@
+[Unit]
+Description=Confirma o DDR turbo apos 10 min estavel
+[Timer]
+OnBootSec=10min
+[Install]
+WantedBy=timers.target

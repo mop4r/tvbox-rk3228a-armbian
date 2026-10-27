@@ -1,0 +1,24 @@
+/dts-v1/;
+/plugin/;
+/ {
+	compatible = "rockchip,rk3228";
+	fragment@0 {
+		target-path = "/";
+		__overlay__ {
+			reserved-memory {
+				#address-cells = <1>;
+				#size-cells = <1>;
+				ranges;
+				ramoops@9ff00000 {
+					compatible = "ramoops";
+					reg = <0x9ff00000 0x100000>;
+					record-size = <0x20000>;
+					console-size = <0x40000>;
+					ftrace-size = <0>;
+					pmsg-size = <0>;
+					ecc-size = <16>;
+				};
+			};
+		};
+	};
+};

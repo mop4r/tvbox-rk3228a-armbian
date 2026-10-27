@@ -1,0 +1,3 @@
+# O @reboot do /etc/cron.d/pihole roda antes da rede/DNS/relogio ficarem prontos e grava
+# GITHUB_*=null em /etc/pihole/versions ("The versions file is incomplete" no rodape). Repete 5 min depois.
+@reboot   root   sleep 300; PATH="$PATH:/usr/sbin:/usr/local/bin/" pihole updatechecker reboot

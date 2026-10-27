@@ -1,0 +1,10 @@
+// Atualiza tudo (Debian + Armbian), menos a cadeia de boot (kernel/dtb/u-boot travados no RK3228A)
+Unattended-Upgrade::Origins-Pattern { "origin=*"; };
+Unattended-Upgrade::Package-Blacklist { "linux-u-boot-"; "linux-image-"; "linux-dtb-"; };
+Unattended-Upgrade::Remove-Unused-Dependencies "true";
+Unattended-Upgrade::Automatic-Reboot "true";
+Unattended-Upgrade::Automatic-Reboot-Time "04:00";
+Dpkg::Options { "--force-confdef"; "--force-confold"; };
+
+// Armbian desliga em 02-armbian-periodic; religa (20/10)
+APT::Periodic::Enable "1";

@@ -1,0 +1,9 @@
+[Unit]
+Description=Caixa-preta: estado da box a cada 30s no eMMC
+After=local-fs.target
+[Service]
+ExecStart=/usr/local/sbin/blackbox.sh
+Restart=always
+Nice=10
+[Install]
+WantedBy=multi-user.target

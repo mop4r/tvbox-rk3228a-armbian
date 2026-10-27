@@ -1,0 +1,10 @@
+[Unit]
+Description=DDR turbo com volta automatica para 330 MHz
+After=local-fs.target systemd-modules-load.service
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/ddr-turbo boot
+ExecStop=/usr/local/sbin/ddr-turbo stop
+[Install]
+WantedBy=multi-user.target
